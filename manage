@@ -1,0 +1,7 @@
+#!/bin/sh
+# 无论从哪个目录调用，都使用当前工作目录中的 Python 环境。
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ -x "$SCRIPT_DIR/.venv/bin/python" ]; then
+    exec "$SCRIPT_DIR/.venv/bin/python" "$SCRIPT_DIR/manage.py" "$@"
+fi
+exec python3 "$SCRIPT_DIR/manage.py" "$@"

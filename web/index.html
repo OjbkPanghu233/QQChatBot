@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>鲸鱼 · 机器人运行台</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+  <script src="/management.js" defer></script>
+</head>
+<body>
+  <aside class="rail">
+    <a class="brand" href="#top" aria-label="鲸鱼运行台首页">
+      <svg viewBox="0 0 44 44" fill="none" aria-hidden="true"><path d="M8 20c0-7 5-12 12-12s12 5 12 12v2c3 0 5-2 6-5 3 7-1 15-8 16-3 3-7 4-12 2C11 33 8 27 8 20Z" fill="currentColor"/><circle cx="17" cy="20" r="2" fill="white"/><path d="M21 9c-2-3-1-5 1-6M25 9c1-3 3-4 5-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </a>
+    <div class="rail-label">LOCAL BOT</div>
+    <nav aria-label="仪表盘导航">
+      <a href="#top" class="nav-item active" data-nav="top"><span>◫</span>运行概览</a>
+      <a href="#memory" class="nav-item" data-nav="memory"><span>◉</span>消息池</a>
+      <a href="#activity" class="nav-item" data-nav="activity"><span>≋</span>处理记录</a>
+    </nav>
+    <div class="rail-bottom"><span class="local-dot"></span>本机运行<br><small>127.0.0.1</small></div>
+  </aside>
+
+  <main id="top">
+    <header class="page-header">
+      <div><div class="eyebrow">WHALE OBSERVATORY <span>/</span> 群聊机器人</div><h1>鲸鱼的工作日常<span class="title-dot">.</span></h1><p id="subtitle">正在读取机器人状态…</p></div>
+      <div class="header-right"><div class="live-badge" id="connection"><i></i><span>连接仪表盘</span></div><div class="sync" id="sync">等待同步</div></div>
+    </header>
+
+    <div class="notice hidden" id="offline" role="status">与仪表盘的连接已断开。正在重试，以下是最后一次收到的数据。</div>
+
+    <section class="stats" aria-label="运行指标">
+      <article class="stat"><div class="stat-top">QQ / NAPCAT <span class="stat-icon">↔</span></div><div class="stat-value" id="onebot">连接中<span class="mini-dot muted"></span></div><div class="stat-foot" id="group-name">等待群聊连接</div></article>
+      <article class="stat"><div class="stat-top">本地模型 <span class="stat-icon">✧</span></div><div class="stat-value model-value" id="model-name">DeepSeek</div><div class="stat-foot" id="model-state">检查 Ollama 状态…</div></article>
+      <article class="stat"><div class="stat-top">任务队列 <span class="stat-icon">≡</span></div><div class="stat-value"><span id="queue-count">0</span><small>条待处理</small></div><div class="stat-foot" id="run-count">本次运行尚未收到消息</div></article>
+      <article class="stat"><div class="stat-top">群友消息池 <span class="stat-icon">◉</span></div><div class="stat-value"><span id="people-count">0</span><small>位群友</small></div><div class="stat-foot" id="pool-count">0 条记忆 · 每人最多 40 条</div></article>
+    </section>
+
+    <div class="workspace">
+      <section class="panel work-panel" aria-labelledby="work-title">
+        <div class="panel-head"><div><div class="eyebrow">LIVE WORKFLOW</div><h2 id="work-title">正在发生</h2></div><div class="head-actions"><button class="text-button" id="follow-live">跟随实时 ↗</button><span class="stage-badge" id="task-status">等待消息</span></div></div>
+        <div class="target-message"><div class="avatar" id="target-avatar">鲸</div><div class="target-body"><div class="target-meta"><strong id="target-user">下一位聊天的群友</strong><span id="target-time">—</span><span class="tag" id="target-mode">监听中</span></div><div id="target-text">鲸鱼正在等群里的下一条消息。</div></div></div>
+        <div class="pipeline" id="pipeline" aria-label="消息处理阶段">
+          <div data-step="queued"><span>01</span><b>收到消息</b></div><div data-step="context"><span>02</span><b>整理上下文</b></div><div data-step="thinking"><span>03</span><b>模型思考</b></div><div data-step="generating"><span>04</span><b>生成回复</b></div><div data-step="sending"><span>05</span><b>发送群聊</b></div>
+        </div>
+        <div class="trace-tabs" role="tablist" aria-label="任务详情"><button class="selected" role="tab" aria-selected="true" data-tab="thinking">思考过程 <i id="stream-dot"></i></button><button role="tab" aria-selected="false" data-tab="prompt">输入上下文</button><button role="tab" aria-selected="false" data-tab="steps">执行时间线</button><span id="elapsed">等待新任务</span></div>
+        <div class="trace-content" id="trace-content"><div class="trace-caption" id="trace-caption">THINKING STREAM</div><pre id="trace-text" class="empty-text">收到消息后，这里会逐步展示模型的思考内容。</pre></div>
+        <div class="answer-box"><div class="answer-label"><span>↳</span> 群聊回复 <span class="answer-note" id="answer-state">仅最终文本会发送到 QQ</span></div><div id="answer-text" class="empty-text">还没有新的回复</div></div>
+        <div class="work-footer"><span id="context-info">上下文 —</span><span id="token-info">等待模型输出</span></div>
+      </section>
+
+      <section class="panel activity-panel" id="activity" aria-labelledby="activity-title">
+        <div class="panel-head"><div><div class="eyebrow">RECENT ACTIVITY</div><h2 id="activity-title">处理记录</h2></div><span class="count-pill" id="trace-count">0</span></div>
+        <p class="panel-description">选择一条消息，回看它的处理过程。</p>
+        <div id="traces" class="trace-list"><div class="list-empty">还没有任务记录<br><small>新群消息触发回复后会出现在这里</small></div></div>
+        <div class="event-strip" id="last-event">正在监听目标群…</div>
+      </section>
+    </div>
+
+    <section class="panel memory-panel" id="memory" aria-labelledby="memory-title">
+      <div class="panel-head"><div><div class="eyebrow">PEOPLE & MEMORY</div><h2 id="memory-title">每位群友，都有自己的消息池</h2></div><span class="tag">实时内存 + 本地保存</span></div>
+      <div class="memory-layout">
+        <div class="people-sidebar"><label class="search"><span>⌕</span><input id="people-search" type="search" placeholder="搜索昵称 / QQ 号" aria-label="搜索群友"></label><div class="people-heading">群友 <span id="people-filter-count">0</span></div><div id="people-list" class="people-list"></div></div>
+        <div class="person-detail">
+          <div id="person-empty" class="large-empty">◉<h3>消息会慢慢变成记忆</h3><p>群友发言后，这里会显示他的个人消息池。</p></div>
+          <div id="person-content" class="hidden">
+            <div class="person-heading"><div class="avatar large" id="person-avatar">鲸</div><div><h3 id="person-name">—</h3><p id="person-id">QQ —</p></div><span class="pool-capacity" id="person-capacity">0 / 40</span></div>
+            <div class="person-metrics"><span>累计发言 <b id="person-count">0</b></span><span>点名互动 <b id="person-direct">0</b></span><span>最近活跃 <b id="person-last">—</b></span></div>
+            <div class="person-notes hidden" id="person-notes"></div>
+            <div class="pool-heading"><span>最近发言</span><span>最新在上 · 每条最多 120 字</span></div>
+            <div class="pool-messages" id="pool-messages"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="page-footer"><span>鲸鱼运行台 <span class="divider">/</span> 只读观察，不打扰群聊</span><span id="uptime">启动中</span></footer>
+  </main>
+</body>
+</html>
